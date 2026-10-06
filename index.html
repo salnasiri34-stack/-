@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شرح درسـي مادة الحديث - الثاني المتوسط</title>
+    <!-- استيراد خط كوفي احترافي وواضح جداً للشاشات الكبيرة -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #0d5c3d;
+            --secondary-color: #1b8a5a;
+            --accent-color: #d4af37;
+            --bg-color: #f4f7f6;
+            --text-color: #222222;
+            --card-bg: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.8;
+            font-size: 22px; /* خط كبير ومناسب للشاشات والفصل */
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        header h1 {
+            font-size: 42px;
+            font-weight: 900;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 24px;
+            opacity: 0.9;
+        }
+
+        /* شريط أدوات القلم العائم */
+        .toolbar {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            padding: 10px 15px;
+            border-radius: 50px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .toolbar button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 700;
+            transition: 0.3s;
+        }
+
+        .toolbar button:hover {
+            background: var(--secondary-color);
+        }
+
+        .toolbar input[type="color"] {
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        /* طبقة الرسم بالقلم على الشاشة */
+        #drawCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        #drawCanvas.active {
+            pointer-events: auto;
+            cursor: crosshair;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .lesson-section {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 40px;
+            margin-bottom: 50px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+            border-top: 8px solid var(--primary-color);
+            position: relative;
+        }
+
+        .page-badge {
+            position: absolute;
+            top: 25px;
+            left: 30px;
+            background: var(--accent-color);
+            color: #fff;
+            padding: 6px 20px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 20px;
+        }
+
+        h2.lesson-title {
+            font-size: 36px;
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            border-bottom: 3px solid #eee;
+            padding-bottom: 15px;
+        }
+
+        .hadith-box {
+            background: #fdfaf3;
+            border: 2px dashed var(--accent-color);
+            padding: 25px;
+            border-radius: 12px;
+            margin: 25px 0;
+            text-align: center;
+            font-size: 26px;
+            font-weight: 700;
+            color: #5c4001;
+        }
+
+        .info-card {
+            background: #f1f8f5;
+            border-right: 6px solid var(--secondary-color);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .info-card h3 {
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+            font-size: 26px;
+        }
+
+        /* جدول الكلمات ومعانيها */
+        table.vocab-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 22px;
+        }
+
+        table.vocab-table th, table.vocab-table td {
+            border: 2px solid #ddd;
+            padding: 15px;
+            text-align: right;
+        }
+
+        table.vocab-table th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        table.vocab-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        /* تنسيق التقويم (سؤال وجواب) */
+        .qa-container {
+            margin-top: 35px;
+            background: #fffbe6;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid #ffe58f;
+        }
+
+        .qa-container h3 {
+            color: #d48806;
+            font-size: 28px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ffe58f;
+            padding-bottom: 10px;
+        }
+
+        .qa-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .qa-question {
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            font-size: 24px;
+        }
+
+        .qa-answer {
+            color: #444;
+            font-size: 22px;
+            padding-right: 15px;
+            border-right: 4px solid var(--secondary-color);
+        }
+
+        /* قسم الاختبار التفاعلي */
+        .quiz-section {
+            margin-top: 40px;
+            background: #eef6fc;
+            padding: 30px;
+            border-radius: 12px;
+            border: 2px solid #b7d5eb;
+        }
+
+        .quiz-section h3 {
+            color: #0056b3;
+            font-size: 28px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .question-box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .options-list {
+            list-style: none;
+            margin-top: 15px;
+        }
+
+        .options-list li {
+            padding: 12px 15px;
+            margin: 8px 0;
+            background: #f4f4f4;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 20px;
+            border: 2px solid transparent;
+        }
+
+        .options-list li:hover {
+            background: #e2eef9;
+        }
+
+        .options-list li.correct {
+            background: #d4edda !important;
+            border-color: #28a745;
+            color: #155724;
+            font-weight: bold;
+        }
+
+        .options-list li.wrong {
+            background: #f8d7da !important;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+
+        .submit-quiz-btn {
+            display: block;
+            width: 100%;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: 0.3s;
+        }
+
+        .submit-quiz-btn:hover {
+            background: var(--secondary-color);
+        }
+
+        .quiz-score {
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            margin-top: 20px;
+            color: var(--primary-color);
+        }
+
+        footer {
+            background: #111;
+            color: white;
+            text-align: center;
+            padding: 30px;
+            margin-top: 60px;
+            font-size: 20px;
+        }
+
+        footer p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- شريط أدوات القلم للكتابة والتخطيط على الشاشة -->
+    <div class="toolbar">
+        <button id="penToggle" onclick="togglePen()">✏️ تفعيل القلم</button>
+        <input type="color" id="penColor" value="#ff0000" title="لون القلم">
+        <button onclick="clearCanvas()">🗑️ مسح الرسم</button>
+    </div>
+
+    <canvas id="drawCanvas"></canvas>
+
+    <header>
+        <h1>شرح دروس مادة الحديث والسيرة</h1>
+        <p>الصف الثاني المتوسط - الفصل الدراسي الأول</p>
+    </header>
+
+    <div class="container">
+
+        <!-- ==================== الدرس الخامس ==================== -->
+        <section class="lesson-section">
+            <div class="page-badge">الصفحات: 118 - 119</div>
+            <h2 class="lesson-title">الدرس الخامس: حُسْنُ الظَّنِّ باللهِ</h2>
+
+            <div class="hadith-box">
+                عن جابر بن عبد الله الأنصاري رضي الله عنه قال: سمعت رسول الله ﷺ قبل موته بثلاثة أيام يقول: <strong>«لا يموتنَّ أحدُكُم إلا وهو يحسنُ الظنَّ باللهِ عز وجل»</strong>.
+            </div>
+
+            <div class="info-card">
+                <h3>التعريف بالراوي (جابر بن عبد الله رضي الله عنه):</h3>
+                <p>هو الصحابي الجليل جابر بن عبد الله الأنصاري الخزرجي، شهد بيعة العقبة، وكان له حلقة في المسجد النبوي يؤخذ عنه العلم، وكان مفتي المدينة في زمانه.</p>
+            </div>
+
+            <h3 style="margin-top: 30px; color: var(--primary-color); font-size: 26px;">معاني الكلمات:</h3>
+            <table class="vocab-table">
+                <tr>
+                    <th>الكلمة</th>
+                    <th>معناها</th>
+                </tr>
+                <tr>
+                    <td>يُحسن الظن بالله</td>
+                    <td>يعتقد أنه يرحمه ويعفو عنه.</td>
+                </tr>
+            </table>
+
+            <div class="info-card" style="background: #eef9f4; border-right-color: var(--primary-color);">
+                <h3>من معاني الحديث:</h3>
+                <ol style="padding-right: 20px; font-size: 22px;">
+                    <li style="margin-bottom: 10px;">المؤمن يحسن الظن بربه طيلة حياته، فقد قال تعالى في الحديث القدسي: « أنا عند ظن عبدي بي... ».</li>
+                    <li style="margin-bottom: 10px;">حسن الظن بالله إن حمل على العمل الصالح وحث عليه، فهو صحيح، وإن دعا إلى البطالة والانهماك في المعاصي فهو غرور.</li>
+                    <li>في أوقات الشدة والمصائب ينبغي للمسلم أن يتذكر رحمة الله وكرمه ولطفه، فإن ذلك يساعد على تخفيف النفس وتجاوز الشدة.</li>
+                </ol>
+            </div>
+
+            <div class="info-card" style="background: #fffdf5; border-right-color: var(--accent-color);">
+                <h3>تطبيقات سلوكية:</h3>
+                <ul style="list-style-type: disc; padding-right: 20px; font-size: 22px;">
+                    <li>أعمل الصالحات وأحسن الظن بالله.</li>
+                    <li>أرجو رحمة الله وعفوه في حياتي وعند مماتي.</li>
+                </ul>
+            </div>
+
+            <!-- تقويم الدرس الخامس -->
+            <div class="qa-container">
+                <h3>التقويم (الدرس الخامس)</h3>
+                
+                <div class="qa-item">
+                    <div class="qa-question">س1: كيف يُحسِن المسلم ظنه بالله عز وجل؟</div>
+                    <div class="qa-answer">ج: بأن يعمل الصالحات ويظن أن الله يقبلها، ويتوب من السيئات ويظن أن الله يغفرها.</div>
+                </div>
+
+                <div class="qa-item">
+                    <div class="qa-question">س2: استخرج فائدتين من فوائد الحديث.</div>
+                    <div class="qa-answer">ج: 
+                        1- وجوب إحسان الظن بالله تعالى خاصة عند الموت.<br>
+                        2- حسن الظن من حسن العبادة.<br>
+                        3- من أحسن ظنه بالله في شيء حققه الله له.
+                    </div>
+                </div>
+
+                <div class="qa-item">
+                    <div class="qa-question">س3: أين علاقة هذا الحديث بالحديث القدسي «أنا عند ظن عبدي بي...»؟</div>
+                    <div class="qa-answer">ج: حديث جابر رضي الله عنه فيه تأكيد وتطبيق لما ورد في الحديث القدسي فمن أحسن الظن بالله عند موته، فإن الله لا يخيبه ولا يضيع عمله، فإن الله عند ظن عبده به.</div>
+                </div>
+            </div>
+
+            <!-- اختبار تفاعلي الدرس الخامس -->
+            <div class="quiz-section">
+                <h3>اختبار تفاعلي (الدرس الخامس: حسن الظن بالله)</h3>
+                <div id="quiz-1">
+                    <!-- أسئلة الاختبار 1 سيتم توليدها برمجياً -->
+                </div>
+                <button class="submit-quiz-btn" onclick="checkQuiz(1)">تصحيح اختبار الدرس الخامس</button>
+                <div id="score-1" class="quiz-score"></div>
+            </div>
+        </section>
+
+
+        <!-- ==================== الدرس السادس ==================== -->
+        <section class="lesson-section">
+            <div class="page-badge">الصفحات: 120 - 122</div>
+            <h2 class="lesson-title">الدرس السادس: التَّوَكُّلُ عَلَى اللهِ</h2>
+
+            <div class="hadith-box">
+                عن عمر بن الخطاب رضي الله عنه قال: قال رسول الله ﷺ: <strong>«لو أنّكم توكلونَ على اللهِ حقَّ توكلِهِ لرزقكم كما يرزقُ الطيرَ تغدو خماصاً وتروح بطاناً»</strong> أخرجه الترمذي.
+            </div>
+
+            <div class="info-card">
+                <h3>التعريف بالراوي (عمر بن الخطاب رضي الله عنه):</h3>
+                <p>هو الخليفة الراشد عمر بن الخطاب القرشي، أبو حفص، أمير المؤمنين، أسلم بمكة قديماً، ومن مناقبه  أنّه كان في وجهه خطان أسودان من البكاء، وكان لا تأخذه في الله لومة لائم، وقال ابن مسعود رضي الله عنه: مازلنا أعزة منذ أسلم عمر.</p>
+            </div>
+
+            <h3 style="margin-top: 30px; color: var(--primary-color); font-size: 26px;">معاني الكلمات:</h3>
+            <table class="vocab-table">
+                <tr>
+                    <th>الكلمة</th>
+                    <th>معناها</th>
+                </tr>
+                <tr>
+                    <td>تغدو</td>
+                    <td>تذهب أول النهار.</td>
+                </tr>
+                <tr>
+                    <td>خماصاً</td>
+                    <td>ضامرة البطون من الجوع.</td>
+                </tr>
+                <tr>
+                    <td>تروح</td>
+                    <td>ترجع آخر النهار.</td>
+                </tr>
+                <tr>
+                    <td>بطاناً</td>
+                    <td>متلئة البطون من الشبع.</td>
+                </tr>
+            </table>
+
+            <div class="info-card">
+                <h3>مُصْطَلَحَاتٌ:</h3>
+                <p><strong>التوكل على الله:</strong> هو الاعتماد على الله وحده لا شريك له في جميع الأمور الدينية والدنيوية.</p>
+            </div>
+
+            <div class="info-card" style="background: #eef9f4; border-right-color: var(--primary-color);">
+                <h3>من معاني الحديث:</h3>
+                <ol style="padding-right: 20px; font-size: 22px;">
+                    <li style="margin-bottom: 10px;">التوكل على الله صفة من صفات المؤمنين، به تتحقق طمأنينة النفس وراحة القلب؛ قال تعالى: ﴿وَعَلَى اللَّهِ فَتَوَكَّلُوا إِنْ كُنْتُمْ مُؤْمِنِينَ﴾ وقال تعالى: ﴿وَمَنْ يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ﴾.</li>
+                    <li style="margin-bottom: 10px;">توكلك على الله من أعظم الأسباب التي تستجلب بها الرزق، تأمل هذه الطيور تذهب من أوكارها كل صباح لتستجلب رزق الله فتعود وقد ملئت بطونها.</li>
+                    <li>توكلك على الله في طلب الرزق، يلزم منه أن تسعى وتجد في طلبه.</li>
+                </ol>
+            </div>
+
+            <div class="info-card" style="background: #fffdf5; border-right-color: var(--accent-color);">
+                <h3>تطبيقات سلوكية:</h3>
+                <ul style="list-style-type: disc; padding-right: 20px; font-size: 22px;">
+                    <li>أتوكل على الله في جميع أموري فهو حسبي.</li>
+                    <li>أتوكل على الله وأعمل الأسباب.</li>
+                </ul>
+            </div>
+
+            <!-- تقويم الدرس السادس -->
+            <div class="qa-container">
+                <h3>التقويم (الدرس السادس)</h3>
+                
+                <div class="qa-item">
+                    <div class="qa-question">س1: كيف يحقق التوكل على الله طمأنينة النفس وراحة القلب؟</div>
+                    <div class="qa-answer">ج: عند الاعتماد على الله تعالى وحده لا شريك له في جميع الأمور الدينية والدنيوية.</div>
+                </div>
+
+                <div class="qa-item">
+                    <div class="qa-question">س2: استدل من الحديث على أن فعل الأسباب لا ينافي التوكل على الله.</div>
+                    <div class="qa-answer">ج: قال رسول الله ﷺ: « تغدو خماصاً وتروح بطاناً » أخرجه الترمذي.<br>فهذه الطيور الصغيرة تستجلب رزق الله عز وجل فتعود وقد ملئت بطونها، وهذا دليل على أن فعل الأسباب والسعي لنيل الرزق لا ينافي التوكل على الله عز وجل.</div>
+                </div>
+            </div>
+
+            <!-- اختبار تفاعلي الدرس السادس -->
+            <div class="quiz-section">
+                <h3>اختبار تفاعلي (الدرس السادس: التوكل على الله)</h3>
+                <div id="quiz-2">
+                    <!-- أسئلة الاختبار 2 سيتم توليدها برمجياً -->
+                </div>
+                <button class="submit-quiz-btn" onclick="checkQuiz(2)">تصحيح اختبار الدرس السادس</button>
+                <div id="score-2" class="quiz-score"></div>
+            </div>
+        </section>
+
+    </div>
+
+    <footer>
+        <p>جميع الحقوق محفوظة لصالح وزارة التعليم</p>
+        <p>تم تطوير وبرمجة الموقع بواسطة: <strong>SULIMAN ALNASIRI</strong></p>
+    </footer>
+
+    <script>
+        /* --- سكربت أداة الرسم بالقلم --- */
+        let isDrawing = false;
+        const canvas = document.getElementById('drawCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function togglePen() {
+            canvas.classList.toggle('active');
+            const btn = document.getElementById('penToggle');
+            if (canvas.classList.contains('active')) {
+                btn.style.background = '#dc3545';
+                btn.innerText = '🛑 إيقاف القلم';
+            } else {
+                btn.style.background = 'var(--primary-color)';
+                btn.innerText = '✏️ تفعيل القلم';
+            }
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            if (!canvas.classList.contains('active')) return;
+            isDrawing = true;
+            ctx.beginPath();
+            ctx.moveTo(e.clientX, e.clientY);
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDrawing || !canvas.classList.contains('active')) return;
+            ctx.strokeStyle = document.getElementById('penColor').value;
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            ctx.lineTo(e.clientX, e.clientY);
+            ctx.stroke();
+        });
+
+        canvas.addEventListener('mouseup', () => isDrawing = false);
+
+
+        /* --- بيانات الاختبارات التفاعلية (10 أسئلة لكل درس) --- */
+        const quizData1 = [
+            {
+                q: "ما معنى (يُحسن الظن بالله) في الحديث؟",
+                options: ["يعتقد أنه يرحمه ويعفو عنه", "يخاف من عقابه فقط", "يترك العمل وينتظر الرزق", "يكثر من النوم"],
+                answer: 0
+            },
+            {
+                q: "من راوي حديث حسن الظن بالله؟",
+                options: ["عمر بن الخطاب رضي الله عنه", "جابر بن عبد الله رضي الله عنه", "أبو هريرة رضي الله عنه", "عبد الله بن مسعود رضي الله عنه"],
+                answer: 1
+            },
+            {
+                q: "متى قال النبي ﷺ حديث حسن الظن بالله؟",
+                options: ["قبل موته بشهر", "قبل موته بسنة", "قبل موته بثلاثة أيام", "في يوم عرفة"],
+                answer: 2
+            },
+            {
+                q: "ما هو لقب الصحابي الجليل جابر بن عبد الله رضي الله عنه في المدينة؟",
+                options: ["أمير المؤمنين", "مفتي المدينة", "خطيب الرسول", "قاضي القضاة"],
+                answer: 1
+            },
+            {
+                q: "الحديث القدسي المرتبط بحسن الظن بالله يبدأ بـ:",
+                options: ["أنا عند ظن عبدي بي", "إن الله يحب المحسنين", "التائب من الذنب كمن لا ذنب له", "الرحمن على العرش استوى"],
+                answer: 0
+            },
+            {
+                q: "حسن الظن بالله إن حمل على العمل الصالح فهو:",
+                options: ["غرور وبطالة", "صحيح ومطلوب", "مكروه", "بدعة"],
+                answer: 1
+            },
+            {
+                q: "إذا دعا حسن الظن إلى البطالة والانهماك في المعاصي دون عمل، فهو:",
+                options: ["يقين صادق", "غرور مذموم", "توقير لله", "صبر جميل"],
+                answer: 1
+            },
+            {
+                q: "في أوقات الشدة والمصائب، تذكر رحمة الله يساعد على:",
+                options: ["تخفيف النفس وتجاوز الشدة", "زيادة الهموم", "اليقن والقنوط", "الغفلة"],
+                answer: 0
+            },
+            {
+                q: "شهد الصحابي جابر بن عبد الله رضي الله عنه بيعة:",
+                options: ["العقبة", "الرضوان", "بدر", "الحديبية"],
+                answer: 0
+            },
+            {
+                q: "ما هي الوصية الكبرى في حديث جابر رضي الله عنه عند الموت؟",
+                options: ["إحضار الأهل والأقارب", "إحسان الظن بالله عز وجل", "توزيع الأموال", "كتابة الوصية بالتفصيل"],
+                answer: 1
+            }
+        ];
+
+        const quizData2 = [
+            {
+                q: "ما هو تعريف التوكل على الله؟",
+                options: ["الاعتماد على النفس كلياً", "الاعتماد على الله وحده لا شريك له في جميع الأمور الدينية والدنيوية", "ترك الأسباب والقعود في البيوت", "الاعتماد على الأصدقاء"],
+                answer: 1
+            },
+            {
+                q: "من راوي حديث التوكل على الله؟",
+                options: ["عمر بن الخطاب رضي الله عنه", "عثمان بن عفان رضي الله عنه", "علي بن أبي طالب رضي الله عنه", "أنس بن مالك رضي الله عنه"],
+                answer: 0
+            },
+            {
+                q: "ما معنى كلمة (تغدو) في الحديث؟",
+                options: ["ترجع آخر النهار", "تنام في الليل", "تذهب أول النهار", "تطير في السحاب"],
+                answer: 2
+            },
+            {
+                q: "ما معنى كلمة (خماصاً)؟",
+                options: ["ممتلئة البطون", "ضامرة البطون من الجوع", "نائمة في أوقارها", "سريعة الطيران"],
+                answer: 1
+            },
+            {
+                q: "ما معنى كلمة (بطاناً)؟",
+                options: ["جائعة ومتعبة", "خائفة", "متلئة البطون من الشبع", "بعيدة الدار"],
+                answer: 2
+            },
+            {
+                q: "من مناقب الصحابي عمر بن الخطاب رضي الله عنه المذكورة بالدرس:",
+                options: ["أنه كان في وجهه خطان أسودان من البكاء", "أنه كان أغنى الصحابة", "أنه كان أطولهم قامة", "أنه لم يتبعه أحد"],
+                answer: 0
+            },
+            {
+                q: "من قال عن إسلام عمر (مازلنا أعزة منذ أسلم عمر)؟",
+                options: ["أبو بكر الصديق رضي الله عنه", "عبد الله بن مسعود رضي الله عنه", "بلال بن رباح رضي الله عنه", "عثمان بن عفان رضي الله عنه"],
+                answer: 1
+            },
+            {
+                q: "الآية الكريمة الدالة على التوكل: ﴿وَمَنْ يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ...﴾",
+                options: ["حسبه", "غفور رحيم", "ولي الصالحين", "سميع بصير"],
+                answer: 0
+            },
+            {
+                q: "فعل الأسباب والسعي في طلب الرزق:",
+                options: ["ينافي التوكل تماماً", "لا ينافي التوكل بل هو من تمامه", "مكروه شرعاً", "محرم"],
+                answer: 1
+            },
+            {
+                q: "أين أخرج الترمذي حديث التوكل على الله؟",
+                options: ["في سننه", "في مسنده", "في صحيحه", "في معجمه"],
+                answer: 0
+            }
+        ];
+
+        function renderQuiz(quizArray, containerId) {
+            const container = document.getElementById(containerId);
+            let html = '';
+            quizArray.forEach((item, qIndex) => {
+                html += `<div class="question-box">
+                    <p style="font-weight:700; color:#333; margin-bottom:10px;">س${qIndex+1}: ${item.q}</p>
+                    <ul class="options-list" id="q-${containerId}-${qIndex}">`;
+                item.options.forEach((opt, oIndex) => {
+                    html += `<li onclick="selectOption('${containerId}', ${qIndex}, ${oIndex})">${opt}</li>`;
+                });
+                html += `</ul></div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        const userAnswers = { 'quiz-1': {}, 'quiz-2': {} };
+
+        function selectOption(quizId, qIndex, oIndex) {
+            userAnswers[quizId][qIndex] = oIndex;
+            const list = document.getElementById(`q-${quizId}-${qIndex}`).children;
+            for (let i = 0; i < list.length; i++) {
+                list[i].style.background = '#f4f4f4';
+                list[i].style.borderColor = 'transparent';
+            }
+            list[oIndex].style.background = '#dbeafe';
+            list[oIndex].style.borderColor = '#3b82f6';
+        }
+
+        function checkQuiz(quizNum) {
+            const quizId = `quiz-${quizNum}`;
+            const data = quizNum === 1 ? quizData1 : quizData2;
+            let score = 0;
+
+            data.forEach((item, qIndex) => {
+                const selected = userAnswers[quizId][qIndex];
+                const list = document.getElementById(`q-${quizId}-${qIndex}`).children;
+                
+                for (let i = 0; i < list.length; i++) {
+                    list[i].onclick = null; // إيقاف التعديل بعد التصحيح
+                    if (i === item.answer) {
+                        list[i].classList.add('correct');
+                    } else if (i === selected && selected !== item.answer) {
+                        list[i].classList.add('wrong');
+                    }
+                }
+
+                if (selected === item.answer) {
+                    score++;
+                }
+            });
+
+            document.getElementById(`score-${quizNum}`).innerText = `نتيجتك: ${score} من 10`;
+        }
+
+        renderQuiz(quizData1, 'quiz-1');
+        renderQuiz(quizData2, 'quiz-2');
+    </script>
+</body>
+</html>
